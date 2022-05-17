@@ -1,0 +1,66 @@
+service: aws-node-http-api-project
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource: 
+            - arn:aws:dynamodb:us-east-1:187343962510:table/NotesTable
+
+functions:
+  fetchNotes:
+    handler: src/notes/fetchNotes.handler
+    events:
+      - http:
+          path: /notes
+          method: get
+
+  fetchNote:
+    handler: src/notes/fetchNote.handler
+    events:
+      - http:
+          path: /note/{id}
+          method: get
+
+  updateNote:
+    handler: src/notes/updateNote.handler
+    events:
+      - http:
+          path: /note/{id}
+          method: put          
+
+  deleteNote:
+    handler: src/notes/deleteNote.handler
+    events:
+      - http:
+          path: /note/{id}
+          method: delete
+
+  addNote:
+    handler: src/notes/addNote.handler
+    events:
+      - http:
+          path: /note
+          method: post                
+
+resources:
+  Resources:
+    NotesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: NotesTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
